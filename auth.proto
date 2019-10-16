@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option java_package = "com.doohochang.chat.service.grpc";
+
+import "entities.proto";
+
+service AuthService {
+    rpc SignUp (SignUpRequest) returns (SignUpReply) {}
+    rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenReply) {}
+}
+
+message SignUpRequest {
+    string user_name = 1;
+}
+
+message SignUpReply {
+    string access_token = 1;
+    string refresh_token = 2;
+    User user = 3;
+}
+
+message RefreshTokenRequest {
+    string user_id = 1;
+    string refresh_token = 2;
+}
+
+message RefreshTokenReply {
+    string access_token = 1;
+    string refresh_token = 2;
+}

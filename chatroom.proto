@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+option java_package = "com.doohochang.chat.service.grpc";
+
+import "entities.proto";
+
+service ChatRoomService {
+    rpc ListChatRooms (ListChatRoomsRequest) returns (ListChatRoomsReply) {}
+    rpc ListMyChatRooms (ListMyChatRoomsRequest) returns (ListMyChatRoomsReply) {}
+
+    rpc OpenChatRoom (OpenChatRoomRequest) returns (OpenChatRoomReply) {}
+    rpc JoinChatRoom (JoinChatRoomRequest) returns (stream JoinChatRoomReply) {}
+    rpc Say (SayRequest) returns (SayReply) {}
+    rpc Leave (LeaveRequest) returns (LeaveReply) {}
+}
+
+message ListChatRoomsRequest {}
+
+message ListChatRoomsReply {
+    repeated ChatRoom chatrooms = 1;
+}
+
+message ListMyChatRoomsRequest {}
+
+message ListMyChatRoomsReply {
+    repeated ChatRoom chatrooms = 1;
+}
+
+message OpenChatRoomRequest {
+    string chatroom_name = 1;
+}
+
+message OpenChatRoomReply {
+    string opened_chatroom_id = 1;
+}
+
+message JoinChatRoomRequest {
+    string chatroom_id = 1;
+    int64 last_sequence_nr = 2; // 클라이언트에 기록된 이벤트가 없다면 0
+}
+
+message JoinChatRoomReply {
+    // last_sequence_nr 이 서버에서 저장하고 있는 가장 이전의 event보다 먼저인 경우에만 발행
+    message State {
+        repeated string participated_user_ids = 1;
+    }
+
+    message Joined {
+        repeated string user_ids = 1;
+        int64 at = 2;
+    }
+
+    message Left {
+        string user_id = 1;
+        int64 at = 2;
+    }
+
+    message Said {
+        string user_id = 1;
+        string message = 2;
+        int64 at = 3;
+    }
+
+    int64 sequence_nr = 1;
+
+    oneof event {
+        State initial_state = 2;
+        Joined joined = 3;
+        Left left = 4;
+        Said said = 5;
+    }
+}
+
+message SayRequest {
+    string chatroom_id = 1;
+    string message = 2;
+}
+
+message SayReply {}
+
+message LeaveRequest {
+    string chatroom_id = 1;
+}
+
+message LeaveReply {}
